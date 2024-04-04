@@ -2,8 +2,8 @@ FROM python:3-bookworm as pip-builder
 
 WORKDIR /app
 
-RUN apk add --no-cache \
-    zlib-dev jpeg-dev libwebp-dev
+RUN apt-get update && apt-get install -y \
+    zlib-dev libjpeg-dev libwebp-dev
 ENV PYTHONUSERBASE=/app/__pypackages__
 RUN CC="cc -mavx2" pip install --user pillow-simd --global-option="build_ext" --global-option="--enable-webp"
 RUN pip install --user mitmdump
@@ -17,6 +17,7 @@ RUN go build -o tailscale.combined -tags ts_include_cli ./cmd/tailscaled
 
 WORKDIR /app
 RUN cp /temp/tailscale.combined ./
+
 RUN ln -s tailscale.combined tailscale
 RUN ln -s tailscale.combined tailscaled
 
