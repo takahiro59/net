@@ -3,7 +3,7 @@ FROM python:3-alpine as pip-builder
 WORKDIR /app
 
 RUN apk add --no-cache \
-    zlib-dev jpeg-dev
+    zlib-dev jpeg-dev libwebp-dev
 ENV PYTHONUSERBASE=/app/__pypackages__
 RUN CC="cc -mavx2" pip install --user pillow-simd --global-option="build_ext" --global-option="--enable-webp"
 RUN pip install --user mitmdump
