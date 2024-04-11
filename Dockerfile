@@ -1,19 +1,20 @@
-FROM python:3-bookworm as pip-builder
+FROM python:3-alpine as pip-builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    zlib1g-dev libjpeg-dev libwebp-dev
+RUN apk add --no-cache \
+    zlib-dev jpeg-dev libwebp-dev gcc
 ENV PYTHONUSERBASE=/app/__pypackages__
 RUN CC="cc -mavx2" pip install --user pillow-simd --global-option="build_ext" --global-option="--enable-webp"
 RUN pip install --user mitmdump
 
-FROM golang:bookworm as go-builder
+FROM golang:alpine as go-builder
 
 WORKDIR /temp
-
+RUN apk add --no-cache upx
 RUN git clone -b v1.62.1 https://github.com/tailscale/tailscale.git ./
-RUN go build -o tailscale.combined -tags ts_include_cli ./cmd/tailscaled
+RUN go build -o tailscale.combined -tags ts_include_cli -ldflags="-s -w" -trimpath ./cmd/tailscale
+RUN upx --ultra-brute ./tailscale.combined
 
 WORKDIR /app
 RUN cp /temp/tailscale.combined ./
@@ -21,7 +22,7 @@ RUN cp /temp/tailscale.combined ./
 RUN ln -s tailscale.combined tailscale
 RUN ln -s tailscale.combined tailscaled
 
-FROM gcr.io/distroless/python3-debian12:debug
+FROM python:3-alpine
 
 WORKDIR /app
 COPY --from=pip-builder /app .
