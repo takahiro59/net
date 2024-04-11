@@ -29,5 +29,5 @@ COPY --from=go-builder /app .
 COPY flows.py .
 
 ENV PYTHONUSERBASE=/app/__pypackages__
-ENV TS_AUTHKEY
+ENV TS_AUTHKEY=""
 ENTRYPOINT sh -c "python -m mitmdump --listen-port 8080 --ssl-insecure -s flows.py --set stream_large_bodies=10m --ignore-hosts '(mzstatic|apple|icloud|mobilesuica|crashlytic|google-analytics|merpay|paypay|rakuten-bank|fate|colopl|rakuten-sec|line|kyash|plexure)' --set block_global=true --set flow_detail=1 --set http2=false --showhost --rawtcp --mode transparent & ./tailscale up --advertise-exit-node --authkey $TS_AUTHKEY"
