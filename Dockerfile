@@ -11,7 +11,7 @@ RUN pip install --user mitmdump
 FROM golang:alpine as go-builder
 
 WORKDIR /temp
-RUN apk add --no-cache upx
+RUN apk add --no-cache upx git
 RUN git clone -b v1.62.1 https://github.com/tailscale/tailscale.git ./
 RUN go build -o tailscale.combined -tags ts_include_cli -ldflags="-s -w" -trimpath ./cmd/tailscale
 RUN upx --ultra-brute ./tailscale.combined
