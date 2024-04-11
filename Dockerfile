@@ -3,7 +3,7 @@ FROM python:3-alpine as pip-builder
 WORKDIR /app
 
 RUN apk add --no-cache \
-    zlib-dev jpeg-dev libwebp-dev alpine-sdk build-base
+    zlib-dev jpeg-dev libwebp-dev alpine-sdk build-base cargo
 ENV PYTHONUSERBASE=/app/__pypackages__
 RUN CC="cc -mavx2" pip install --user pillow-simd --global-option="build_ext" --global-option="--enable-webp"
 RUN pip install --user mitmdump
@@ -11,7 +11,7 @@ RUN pip install --user mitmdump
 FROM golang:alpine as go-builder
 
 WORKDIR /temp
-RUN apk add --no-cache upx git
+RUN apk add --no-cache upx git alpine-sdk build-base
 RUN git clone -b v1.62.1 https://github.com/tailscale/tailscale.git ./
 RUN go build -o tailscale.combined -tags ts_include_cli -ldflags="-s -w" -trimpath ./cmd/tailscale
 RUN upx --ultra-brute ./tailscale.combined
